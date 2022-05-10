@@ -1,0 +1,28 @@
+﻿@model BookStorageApp.Models.Chapter
+
+<div style="background-color: lightgoldenrodyellow; padding: 5%">
+
+    <div style="background-color:antiquewhite">
+
+        <h1>@Model.Name</h1>
+
+        <div>
+            <a asp-controller="Book" asp-action="Details" asp-route-id="@Model.Book.Id">Назад</a>
+        </div>
+
+        @*<div>
+            <label >Размер шрифта</label>
+            <input asp-controller="Chapter" asp-action="ChangeText" asp-route-id="@Model.Id" type="range|submit" min="10" max="40" step="2" value="20">
+        </div>*@
+
+        <div font-size: 20px; color: red;>
+            @Html.Raw(@Model.Text.Replace("\r\n", "<br />"))
+        </div>
+
+        <div>
+            <a asp-controller="Chapter" asp-action="PreviousChapter" asp-route-id="@Model.Id">Назад</a> |
+            <a asp-controller="Book" asp-action="Details" asp-route-id="@Model.Book.Id">Оглавление</a> |
+            <a asp-controller="Chapter" asp-action="NextChapter" asp-route-id="@Model.Id">Вперед</a>
+        </div>
+    </div>
+</div>

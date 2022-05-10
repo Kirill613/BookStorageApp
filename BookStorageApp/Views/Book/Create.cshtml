@@ -1,0 +1,60 @@
+﻿@model BookStorageApp.Models.Book
+@{
+    ViewBag.Title = "Добавление книги";
+}
+
+<div class="container">
+    <h1>Create Book</h1>
+
+    <form asp-action="Create" asp-controller="Book">
+
+        <div class="form-group">
+            <label asp-for="Title" class="control-label"></label>
+            <input type="text" asp-for="Title" class="form-control" />
+            <span asp-validation-for="Title" class="text-danger"></span>
+        </div>
+        <div class="form-group">
+            <label asp-for="Info" class="control-label"></label>
+            <input type="text" asp-for="Info" class="form-control" />
+            <span asp-validation-for="Info" class="text-danger"></span>
+        </div>
+        <div class="form-group">
+            <label asp-for="ReleaseYear" class="control-label"></label>
+            <input type="number" asp-for="ReleaseYear" class="form-control" />
+            <span asp-validation-for="ReleaseYear" class="text-danger"></span>
+        </div>
+        <div class="form-group">
+            <label asp-for="ChapterNumber" class="control-label"></label>
+            <input type="number" asp-for="ChapterNumber" class="form-control" />
+            <span asp-validation-for="ChapterNumber" class="text-danger"></span>
+        </div>
+        <div class="form-group">
+            <label asp-for="AuthorName" class="control-label"></label>
+            <input type="text" asp-for="AuthorName" class="form-control" />
+            <span asp-validation-for="AuthorName" class="text-danger"></span>
+        </div>
+
+        <div class="form-group">
+            <b>Курсы</b>
+            @foreach (var _tag in ViewBag.Tags)
+            {
+                <input type="checkbox" name="selectedCourses" value="@_tag.Id" />
+                @_tag.Name
+                <br />
+            }
+        </div>
+
+        <div class="form-group">
+            <input type="submit" value="Создать" class="btn btn-default" />
+        </div>
+    </form>
+
+    <div>
+        <a asp-action="Index">Вернуться в каталог</a>
+    </div>
+</div>
+
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

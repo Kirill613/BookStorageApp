@@ -1,0 +1,54 @@
+﻿@model BookStorageApp.Models.Chapter
+
+@{
+    ViewData["Title"] = "Create";
+}
+
+<div class="container">
+    <h1>Create Chapter</h1>
+
+    <hr />
+    <div class="row">
+        <div class="col-md-4">
+            <form asp-controller="Chapter" asp-action="Create">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <div class="form-group">
+                    <label asp-for="ChapterNumber" class="control-label"></label>
+                    <input asp-for="ChapterNumber" class="form-control" />
+                    <span asp-validation-for="ChapterNumber" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="VolumeNumber" class="control-label"></label>
+                    <input asp-for="VolumeNumber" class="form-control" />
+                    <span asp-validation-for="VolumeNumber" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="Text" class="control-label"></label>
+                    <input asp-for="Text" class="form-control" />
+                    <span asp-validation-for="Text" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="Name" class="control-label"></label>
+                    <input asp-for="Name" class="form-control" />
+                    <span asp-validation-for="Name" class="text-danger"></span>
+                </div>
+
+                <div>
+                    <input type="hidden" name="bookId" value="@ViewBag.BookId" />
+                </div>
+
+                <div class="form-group">
+                    <input type="submit" value="Создать" class="btn btn-primary" />
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div>
+        <a asp-controller="Book" asp-action="Details" asp-route-id="@ViewBag.BookId">Назад к описанию книги</a>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

@@ -1,28 +1,69 @@
 ﻿@model BookStorageApp.Models.Chapter
 
-<div style="background-color: lightgoldenrodyellow; padding: 5%">
+<style>
+    body {
+    }
 
-    <div style="background-color:antiquewhite">
+    .upback {
+        padding-bottom: 100px;
+    }
 
-        <h1>@Model.Name</h1>
+    .cr-com {
+        padding-top: 100px;
+    }
+</style>
+
+<div style="background-color: #f5f5f5; padding: 5%">
+
+    <div style="background-color:#f5f5f5">
 
         <div>
-            <a asp-controller="Book" asp-action="Details" asp-route-id="@Model.Book.Id">Назад</a>
+            <a asp-controller="Book" asp-action="Details" asp-route-id="@Model.Book.Id" class="upback"><button class="btn btn-primary">Назад</button></a>
         </div>
 
-        @*<div>
-            <label >Размер шрифта</label>
-            <input asp-controller="Chapter" asp-action="ChangeText" asp-route-id="@Model.Id" type="range|submit" min="10" max="40" step="2" value="20">
-        </div>*@
+        <h1>@Model.Name</h1>
 
         <div font-size: 20px; color: red;>
             @Html.Raw(@Model.Text.Replace("\r\n", "<br />"))
         </div>
 
-        <div>
-            <a asp-controller="Chapter" asp-action="PreviousChapter" asp-route-id="@Model.Id">Назад</a> |
-            <a asp-controller="Book" asp-action="Details" asp-route-id="@Model.Book.Id">Оглавление</a> |
-            <a asp-controller="Chapter" asp-action="NextChapter" asp-route-id="@Model.Id">Вперед</a>
+        <div class="upback">
+            <a asp-controller="Chapter" asp-action="PreviousChapter" asp-route-id="@Model.Id"><button class="btn btn-primary">Назад</button></a> |
+            <a asp-controller="Book" asp-action="Details" asp-route-id="@Model.Book.Id"><button class="btn btn-primary">Оглавление</button></a> |
+            <a asp-controller="Chapter" asp-action="NextChapter" asp-route-id="@Model.Id"><button class="btn btn-primary">Вперед</button></a>
         </div>
+
+        @{
+            ViewData["ChapterId"] = Model.Id;
+            ViewData["BookId"] = Model.Book.Id;
+        }
+
+        @await Html.PartialAsync("DetailsChapterCommentsAddPartial", Model.CommentOfChapter.FirstOrDefault(), ViewData)
+
+
+
+        <div class="row">
+
+            <div class="col-4">Текст комментария</div>
+
+            <div class="col">Пользователь</div>
+            <div class="col">Книга</div>
+
+        </div>
+
+        @foreach (var item in Model.CommentOfChapter)
+        {
+            <div class="row">
+                <div class="col-4">@Html.Raw(item.Text.Replace("\r\n", "<br />"))</div>
+
+                <div class="col">
+                    <a class="btn btn-outline-primary me-2 " asp-controller="Account" asp-action="Profile" asp-route-username=@item.User.UserName>@item.User.Email</a>
+                </div>
+                <div class="col">
+                    <a asp-controller="Book" asp-action="Details" asp-route-id="@item.BookId">@Html.DisplayFor(modelItem => item.Book.Title)</a>
+                </div>
+            </div>
+        }
+ 
     </div>
 </div>

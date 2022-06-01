@@ -1,0 +1,27 @@
+﻿@model BookStorageApp.ModelsView.FilerViewModel
+@{
+
+}
+<div class="container">
+    <form asp-action="Index" method="get">
+            <input asp-for="SearchString" class="form-control" /><br />
+
+            <label class="control-label">Сортировка: </label><br />
+            @Html.DropDownList("sortOrder", Model.SortOrder as SelectList,
+            htmlAttributes: new { @class = "form-control" })<br />
+            <b>Тэги</b>
+
+                @foreach (var _tag in ViewBag.Tags)
+                {
+                    <div >
+                        <input type="checkbox" name="selectedTags" value="@_tag.Id"
+                               @(ViewBag.CheckedTags.Contains(_tag) ? "checked=\"checked\"" : "") />@_tag.Name
+                        </div>
+                    }
+
+
+            <input type="submit" value="Фильтр" class="btn btn-dark" />
+
+    </form>
+</div>
+

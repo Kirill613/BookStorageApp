@@ -1,0 +1,131 @@
+﻿@model BookStorageApp.ModelsView.ProfileViewModel
+
+@{
+    ViewData["Title"] = "Profile";
+    ViewBag.CurrentUrl = Context.Request.GetDisplayUrl();
+}
+
+<div class="container">
+
+    <div class="d-md-flex flex-md-equal w-100 my-md-3 ps-md-3 justify-content-center">
+        <div class="bg-light me-md-3 pt-3 px-3 pt-md-5 px-md-5 text-center overflow-hidden">
+            <div class="my-3 py-3">
+                <h2 class="display-5">Профиль пользователя </h2>
+                <h2 class="display-5">@Model.Email </h2>
+                <row>
+                    <dl>
+                        <dt class="col-sm-2 lead">
+                            Никнейм
+                        </dt>
+                        <dd class="col-sm-10 lead">
+                            @Html.DisplayFor(model => model.NickName)
+                        </dd>
+                        <dt class="col-sm-2 lead">
+                            Аватар
+                        </dt>
+                        <dd class="col-sm-10 lead">
+                            <img src="@("~/image/"+Model.ImageName)" asp-append-version="true" class="rounded-circle " />
+                        </dd>
+                    </dl>
+                </row>
+            </div>
+        </div>
+        <div class="bg-dark me-md-3 pt-3 px-3 pt-md-6 px-md-6 text-white overflow-hidden">
+            <div class="my-3 p-3">
+                @if (@ViewBag.PermitChanges)
+                {
+                    <div>
+
+                        <form asp-action="EditProfile" enctype="multipart/form-data">
+                            <h2 style="margin: 20px" class="display-5">Изменить профиль</h2>
+                            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                            <div style="margin: 20px">
+                                <label class="control-label">Новый никнейм</label>
+                                <input asp-for="NickName" class="form-control" />
+                                <span asp-validation-for="NickName" class="text-danger"></span>
+                            </div>
+
+                            <div style="margin: 20px">
+                                <label class="control-label">Выберите новое изображение</label>
+                                <input asp-for="ImageFile" accept="image/*" />
+                            </div>
+
+                            <div style="margin: 20px">
+                                <input type="submit" value="Save" class="btn btn-light" />
+                            </div>
+                        </form>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <div style="margin: 20px; text-align:center">
+        <h1>Список добавленных книг</h1>
+    </div>
+
+    <div class="row row-cols-md-3 g-4 text-center">
+
+        @foreach (var item in Model.UserBooks)
+        {
+            <div class="col">
+                <div class="card bg-light text-bg-dark h-100" style="width:15rem">
+                    <img class="card-img-top" src="@("~/Image/"+ item.ImageName)" asp-append-version="true" alt="Card image">
+                    <div class="card-body ">
+                        <h4 class="card-text  text-dark">@item.Title</h4>
+                        <h4 class="card-title"><a asp-action="Details" asp-controller="Book" asp-route-id="@item.Id">Подробнее</a></h4>
+                        <h4><a asp-action="RemoveBookToUser" asp-controller="UserBooks" asp-route-bookId="@item.Id" asp-route-returnUrl="@ViewBag.CurrentUrl">Отписка</a></h4>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    <div style="margin: 20px; text-align:center">
+        <h1>Список оставленных комментариев </h1>
+    </div>
+
+
+
+    <div class="row">
+
+        <div class="col-4">Текст комментария</div>
+
+        <div class="col">Пользователь</div>
+        <div class="col">Книга</div>
+        <div class="col">Глава</div>
+        @if (@ViewBag.PermitChanges)
+        {
+            <div class="col">
+                Удаление
+            </div>
+        }
+    </div>
+
+    @foreach (var item in Model.UserComments)
+    {
+        <div class="row">
+            <div class="col-4">@Html.Raw(item.Text.Replace("\r\n", "<br />"))</div>
+
+            <div class="col">
+                <a class="btn btn-outline-primary me-2 " asp-controller="Account" asp-action="Profile" asp-route-username=@item.User.UserName>@item.User.Email</a>
+            </div>
+            <div class="col">
+                <a asp-controller="Book" asp-action="Details" asp-route-id="@item.BookId">@Html.DisplayFor(modelItem => item.Book.Title)</a>
+            </div>
+            <div class="col">
+                <a asp-controller="Chapter" asp-action="Details" asp-route-id="@item.ChapterId">@Html.DisplayFor(modelItem => item.Chapter.Name)</a>
+            </div>
+            @if (@ViewBag.PermitChanges)
+            {
+                <div class="col">
+                    <form asp-controller="Comments" asp-action="DeleteForProfile">
+                        <input type="hidden" asp-for="Id" value="@item.Id" />
+                        <input type="submit" value="Delete" class="btn btn-danger" />
+                    </form>
+                </div>
+            }
+        </div>
+    }
+</div>

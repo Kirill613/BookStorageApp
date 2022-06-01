@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using BookStorageApp.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace BookStorageApp.Controllers
 {
@@ -32,8 +33,22 @@ namespace BookStorageApp.Controllers
                 return NotFound();
             }
 
-            var chapter = await _context.Chapters.Include(x => x.Book)
+            var chapter = await _context.Chapters
+                .Include(x => x.Book)
+                .Include(x => x.CommentOfChapter)
                 .FirstOrDefaultAsync(m => m.Id == id);
+
+
+            var listComments = _context.Comments                     
+                .Where(b => b.ChapterId == chapter.Id)
+                .ToList();
+
+            for (int i = 0; i < listComments.Count; i++)
+            {
+                listComments[i].Book = await _context.Books.FindAsync(listComments[i].BookId);
+                listComments[i].Chapter = await _context.Chapters.FindAsync(listComments[i].ChapterId);
+                listComments[i].User = await _context.Users.FindAsync(listComments[i].UserId);
+            }
 
 
             if (chapter == null)
@@ -118,6 +133,7 @@ namespace BookStorageApp.Controllers
 
         // GET: Chapters/Create
 
+        [Authorize(Roles = "admin")]
         public IActionResult Create(int id)
         {
             ViewBag.BookId = id;
@@ -126,13 +142,15 @@ namespace BookStorageApp.Controllers
 
         // POST: Chapters/Create
         [HttpPost]
+        [Authorize(Roles = "admin")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("ChapterNumber,VolumeNumber,Text,Name")] Chapter chapter, int bookId)
         {
             if (ModelState.ErrorCount <= 1)
             {
                 chapter.Book = await _context.Books.FindAsync(bookId);
-                _context.Add(chapter);
+                _context.Chapters.Add(chapter);
+
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Details), nameof(Book), new { id = bookId });
             }
@@ -140,6 +158,7 @@ namespace BookStorageApp.Controllers
         }
 
         // GET: Chapters/Edit/5
+        [Authorize(Roles = "admin")]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -160,6 +179,7 @@ namespace BookStorageApp.Controllers
 
         // POST: Chapters/Edit/5
         [HttpPost]
+        [Authorize(Roles = "admin")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit([Bind("Id,ChapterNumber,VolumeNumber,Text,Name")] Chapter chapter, int bookId)
         {
@@ -188,6 +208,7 @@ namespace BookStorageApp.Controllers
         }
 
         // GET: Chapters/Delete/5
+        [Authorize(Roles = "admin")]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -208,6 +229,7 @@ namespace BookStorageApp.Controllers
 
         // POST: Chapters/Delete/5
         [HttpPost, ActionName("Delete")]
+        [Authorize(Roles = "admin")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {

@@ -1,0 +1,26 @@
+﻿@model BookStorageApp.ModelsView.CreateUserViewModel
+@{
+    ViewBag.Title = "Добавление пользователя";
+}
+
+<div class="container">
+    <form asp-action="Create" asp-controller="Users">
+        <div asp-validation-summary="All" class="text-danger"></div>
+        <div class="form-group">
+            <label asp-for="Email" class="control-label">Email</label>
+            <input type="text" asp-for="Email" class="form-control" />
+        </div>
+        <div class="form-group">
+            <label asp-for="Password" class="control-label">Пароль</label>
+            <input type="password" asp-for="Password" class="form-control" />
+        </div>
+        <div class="form-group">
+            <label asp-for="NickName" class="control-label">Год рождения</label>
+            <input type="number" asp-for="NickName" class="form-control" />
+        </div>
+        <div class="form-group">
+            <input type="submit" value="Добавить" class="btn btn-outline-secondary" />
+        </div>
+    </form>
+    <a asp-controller="Users" asp-action="AllUsers">Назад к списку пользователей</a>
+</div>

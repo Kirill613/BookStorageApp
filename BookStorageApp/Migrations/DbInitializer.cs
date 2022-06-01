@@ -39,7 +39,8 @@ namespace BookStorageApp.Migrations
                     ReleaseYear = 2006,
                     AuthorName = "Isuna Hasekura",
                     ChapterNumber = 0,
-                    TagsOfBook = { tag1, tag2, tag3 }
+                    TagsOfBook = { tag1, tag2, tag3 },
+                    ImageName = "NoImage.png"
                 };
                 Book book2 = new()
                 {
@@ -49,7 +50,8 @@ namespace BookStorageApp.Migrations
                     ReleaseYear = 2015,
                     AuthorName = "KINUGASA Shougo",
                     ChapterNumber = 0,
-                    TagsOfBook = { tag2, tag3 }
+                    TagsOfBook = { tag2, tag3 },
+                    ImageName = "NoImage.png"
                 };
                 Book book3 = new()
                 {
@@ -59,7 +61,8 @@ namespace BookStorageApp.Migrations
                     ReleaseYear = 2012,
                     AuthorName = "Rifujin na Magonote",
                     ChapterNumber = 0,
-                    TagsOfBook = { tag6 }
+                    TagsOfBook = { tag6 },
+                    ImageName = "NoImage.png"
                 };
                 context.Books.AddRange(book1, book2, book3);
                 context.SaveChanges();

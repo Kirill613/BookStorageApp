@@ -2,90 +2,44 @@
 
 @{
     ViewData["Title"] = "Details";
+    ViewBag.CurrentUrl = Context.Request.GetDisplayUrl();
+    Layout = "_BookDetailsLayout";
 }
-<div class="container">
-    <h1>Book Details</h1>
 
-    <div>
-        <dl class="row">
-            <dt class="col-sm-2">
-                @Html.DisplayNameFor(model => model.Title)
-            </dt>
-            <dd class="col-sm-10">
-                @Html.DisplayFor(model => model.Title)
-            </dd>
-            <dt class="col-sm-2">
-                @Html.DisplayNameFor(model => model.Info)
-            </dt>
-            <dd class="col-sm-10">
-                @Html.DisplayFor(model => model.Info)
-            </dd>
-            <dt class="col-sm-2">
-                @Html.DisplayNameFor(model => model.ReleaseYear)
-            </dt>
-            <dd class="col-sm-10">
-                @Html.DisplayFor(model => model.ReleaseYear)
-            </dd>
-            <dt class="col-sm-2">
-                @Html.DisplayNameFor(model => model.AuthorName)
-            </dt>
-            <dd class="col-sm-10">
-                @Html.DisplayFor(model => model.AuthorName)
-            </dd>
-            <dt class="col-sm-2">
-                @Html.DisplayNameFor(model => model.ChapterNumber)
-            </dt>
-            <dd class="col-sm-10">
-                @Html.DisplayFor(model => model.ChapterNumber)
-            </dd>
+@section Info{
+    @await Html.PartialAsync("DetailsMainInfoPartial", Model)
+}
 
-            <dt class="col-sm-2">
-                @Html.DisplayNameFor(model => model.TagsOfBook)
-            </dt>
-            <dd class="col-sm-10">
-                @foreach (var tag in @Model.TagsOfBook)
-                {
-                    <span>@tag.Name </span>
-                }
-            </dd>
-        </dl>
-
-
-        <h1>@Html.DisplayNameFor(model => model.ChaptersOfBook)</h1>
-
+@section NavigationMenu{
+    <div class="container right-col">
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+            <div class="container">
+                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+                    <ul class="navbar-nav flex-grow-1">
+                        <li class="nav-item; @(ViewBag.Current == "Chapters" ? "active" : "")">
+                            <a class="nav-link text-dark" asp-controller="Book" asp-action="Details" asp-route-id="@Model.Id" asp-route-menuItemSelected="Chapters">Главы</a>
+                        </li>
+                        <li class="nav-item; @(ViewBag.Current == "Comments" ? "active" : "")">
+                            <a class="nav-link text-dark" asp-controller="Book" asp-action="Details" asp-route-id="@Model.Id" asp-route-menuItemSelected="Comments">Комментарии</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
         <div>
-            <a asp-controller="Chapter" asp-action="Create" asp-route-id="@Model.Id">Добавить новую главу</a>
-
-            <table class="table">
-                <tr>
-                    <td>@Html.DisplayNameFor(model => model.ChaptersOfBook.First().VolumeNumber)</td>
-                    <td>@Html.DisplayNameFor(model => model.ChaptersOfBook.First().ChapterNumber)</td>
-                    <td>@Html.DisplayNameFor(model => model.ChaptersOfBook.First().Name)</td>
-                    <td>Редактирование</td>
-                </tr>
-
-                @foreach (var chapter in @Model.ChaptersOfBook.OrderBy(model => model.VolumeNumber).ThenBy(model => model.ChapterNumber))
-                {
-                    <tr>
-                        <td><a asp-controller="Chapter" asp-action="Details" asp-route-id="@chapter.Id">@chapter.VolumeNumber</a></td>
-                        <td><a asp-controller="Chapter" asp-action="Details" asp-route-id="@chapter.Id">@chapter.ChapterNumber</a></td>
-                        <td><a asp-controller="Chapter" asp-action="Details" asp-route-id="@chapter.Id">@chapter.Name</a></td>
-
-                        <td>
-                            <a asp-controller="Chapter" asp-action="Edit" asp-route-id="@chapter.Id">Изменить</a>
-                            <a asp-controller="Chapter" asp-action="Delete" asp-route-id="@chapter.Id">Удалить</a>
-                        </td>
-                    </tr>
-                }
-            </table>
-
+            @switch (@ViewBag.Current)
+            {
+                case "Chapters":
+                    @await Html.PartialAsync("DetailsChaptersPartial", Model)
+                    break;
+                case "Comments":
+                    @await Html.PartialAsync("DetailsCommentsPartial", Model)
+                    break;
+                default:
+                    @await Html.PartialAsync("DetailsMainInfoPartial", Model)
+                    break;
+            }
         </div>
-
     </div>
+}
 
-    <div>
-        <a asp-controller="Book" asp-action="Edit" asp-route-id="@Model.Id">Изменить</a> |
-        <a asp-controller="Book" asp-action="Delete" asp-route-id="@Model.Id">Удалить</a> |
-        <a asp-controller="Book" asp-action="Index">Назад в каталог</a>
-    </div>
-</div>

@@ -1,0 +1,27 @@
+﻿@model IEnumerable<BookStorageApp.Models.Book>
+@{
+
+}
+<div class="container">
+    @if (User.IsInRole("admin"))
+    {
+        <h3><a asp-action="Create" asp-controller="Book">Добавить книгу</a></h3>
+        <h3><a asp-controller="Users" asp-action="AllUsers">Список пользователей</a></h3>
+     
+    }
+    <div class="row row-cols-4 row-cols-md-3 g-4 text-center">
+        @foreach (var item in Model)
+        {
+            <div class="col">
+                <div class="card bg-light text-bg-dark h-100" style="width:15rem">
+                    <img class="card-img-top" src="@("~/Image/"+ item.ImageName)" asp-append-version="true" alt="Card image">
+                    <div class="card-body ">
+                        <h4 class="card-text text-dark">@item.Title</h4>
+                        <h4 class="card-title"><a asp-action="Details" asp-controller="Book" asp-route-id="@item.Id">Подробнее</a></h4>
+
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>

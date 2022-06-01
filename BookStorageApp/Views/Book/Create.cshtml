@@ -6,7 +6,7 @@
 <div class="container">
     <h1>Create Book</h1>
 
-    <form asp-action="Create" asp-controller="Book">
+    <form asp-action="Create" asp-controller="Book" enctype="multipart/form-data">
 
         <div class="form-group">
             <label asp-for="Title" class="control-label"></label>
@@ -33,7 +33,11 @@
             <input type="text" asp-for="AuthorName" class="form-control" />
             <span asp-validation-for="AuthorName" class="text-danger"></span>
         </div>
-
+        <div class="form-group">
+            <label asp-for="ImageFile" class="control-label"></label>
+            <input asp-for="ImageFile" accept="image/*" />
+            <span asp-validation-for="ImageFile" class="text-danger"></span>
+        </div>
         <div class="form-group">
             <b>Курсы</b>
             @foreach (var _tag in ViewBag.Tags)

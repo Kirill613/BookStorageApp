@@ -6,26 +6,81 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using BookStorageApp.Models;
+using BookStorageApp.ModelsView;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Hosting;
+using System.IO;
 
 namespace BookStorageApp.Controllers
 {
     public class BookController : Controller
     {
+        private readonly IWebHostEnvironment _hostEnvironment;
         private readonly AppDbContext _context;
 
-        public BookController(AppDbContext context)
+        public BookController(AppDbContext context, IWebHostEnvironment hostEnvironment)
         {
             _context = context;
+            _hostEnvironment = hostEnvironment;
         }
 
         // GET: Books
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string searchString, string sortOrder, int[] selectedTags)
         {
-            return View(await _context.Books.Include(x => x.TagsOfBook).ToListAsync());
+            IQueryable<Book> books = _context.Books.Include(p => p.TagsOfBook);
+
+            if (!String.IsNullOrEmpty(searchString))
+            {
+                books = books.Where(s => s.Title.ToUpper().Contains(searchString.ToUpper()));
+            }
+
+            var tagList = new List<Tag> { };
+            foreach (var c in _context.Tags.Where(co => selectedTags.Contains(co.Id)))
+            {
+                tagList.Add(c);
+            }
+
+            foreach (var _tag in tagList)
+            {
+                books = books.Where(s => s.TagsOfBook.Contains(_tag));
+            }
+
+            switch (sortOrder)
+            {
+                case "Название":
+                    books = books.OrderBy(s => s.Title);
+                    break;
+                case "Количество глав":
+                    books = books.OrderBy(s => s.ChapterNumber);
+                    break;
+                case "Дата выхода":
+                    books = books.OrderBy(s => s.ReleaseYear);
+                    break;
+                default:
+                    books = books.OrderBy(s => s.Title);
+                    break;
+            }
+
+            FilerViewModel filerViewModel = new FilerViewModel
+            {
+                Books = books,
+                SortOrder = new SelectList(new List<string>()
+                {
+                    "Название",
+                    "Дата выхода",
+                    "Количество глав",
+                }),
+                SearchString = ""
+            };
+            ViewBag.asd = "asd";
+            ViewBag.Tags = _context.Tags.ToList();
+            ViewBag.CheckedTags = tagList;
+
+            return View(filerViewModel);
         }
 
         // GET: Books/Details/5
-        public async Task<IActionResult> Details(int? id)
+        public async Task<IActionResult> Details(int? id, string menuItemSelected = "Chapters")
         {
             if (id == null)
             {
@@ -35,7 +90,17 @@ namespace BookStorageApp.Controllers
             var book = await _context.Books
                             .Include(x => x.TagsOfBook)
                             .Include(x => x.ChaptersOfBook)
+                            .Include(x => x.CommentsOfBook)
                             .FirstOrDefaultAsync(m => m.Id == id);
+
+
+            for (int i = 0; i < book.CommentsOfBook.Count; i++)
+            {
+                book.CommentsOfBook.ToList()[i].Book = await _context.Books.FindAsync(book.CommentsOfBook.ToList()[i].BookId);
+                book.CommentsOfBook.ToList()[i].Chapter = await _context.Chapters.FindAsync(book.CommentsOfBook.ToList()[i].ChapterId);
+                book.CommentsOfBook.ToList()[i].User = await _context.Users.FindAsync(book.CommentsOfBook.ToList()[i].UserId);
+            }
+
 
             List<Tag> tempTagList = new List<Tag>();
 
@@ -48,11 +113,13 @@ namespace BookStorageApp.Controllers
             {
                 return NotFound();
             }
+            ViewBag.Current = menuItemSelected;
 
             return View(book);
-        }
+        }      
 
         // GET: Books/Create
+        [Authorize(Roles = "admin")]
         public IActionResult Create()
         {
             ViewBag.Tags = _context.Tags.ToList();
@@ -61,11 +128,26 @@ namespace BookStorageApp.Controllers
 
         // POST: Books/Create
         [HttpPost]
+        [Authorize(Roles = "admin")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Title,Info,ReleaseYear,AuthorName,ChapterNumber")] Book book, int[] selectedCourses)
+        public async Task<IActionResult> Create([Bind("Id,Title,Info,ReleaseYear,AuthorName,ChapterNumber,ImageFile")] Book book, int[] selectedCourses)
         {
             if (ModelState.IsValid)
             {
+                //Save image to wwwroot/image
+                if (book.ImageFile != null)
+                {
+                    string wwwRootPath = _hostEnvironment.WebRootPath;
+                    string fileName = Path.GetFileNameWithoutExtension(book.ImageFile.FileName);
+                    string extension = Path.GetExtension(book.ImageFile.FileName);
+                    book.ImageName = fileName = fileName + DateTime.Now.ToString("yymmssfff") + extension;
+                    string path = Path.Combine(wwwRootPath + "/Image/", fileName);
+                    using (var fileStream = new FileStream(path, FileMode.Create))
+                    {
+                        await book.ImageFile.CopyToAsync(fileStream);
+                    }
+                }             
+
                 if (selectedCourses != null)
                 {
                     foreach (var c in _context.Tags.Where(co => selectedCourses.Contains(co.Id)))
@@ -81,6 +163,7 @@ namespace BookStorageApp.Controllers
         }
 
         // GET: Books/Edit/5
+        [Authorize(Roles = "admin")]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -102,8 +185,9 @@ namespace BookStorageApp.Controllers
 
         // POST: Books/Edit/5
         [HttpPost]
+        [Authorize(Roles = "admin")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Title,Info,ReleaseYear,AuthorName,ChapterNumber")] Book book, int[] selectedCourses)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Title,Info,ReleaseYear,AuthorName,ChapterNumber,ImageFile")] Book book, int[] selectedCourses)
         {
             if (id != book.Id)
             {
@@ -126,6 +210,33 @@ namespace BookStorageApp.Controllers
                             book.TagsOfBook.Add(c);
                         }
                     }
+                    if (data.ImageName != null)
+                    {
+                        book.ImageName = data.ImageName;
+                    }
+
+                    if (book.ImageFile != null)
+                    {
+                        //delete prev
+                        if (data.ImageName != null && data.ImageName != "NoImage.png")
+                        {
+                            var imagePath = Path.Combine(_hostEnvironment.WebRootPath, "Image", data.ImageName);
+                            if (System.IO.File.Exists(imagePath))
+                                System.IO.File.Delete(imagePath);
+                        }
+                        //Save image to wwwroot/image
+                        string wwwRootPath = _hostEnvironment.WebRootPath;
+                        string fileName = Path.GetFileNameWithoutExtension(book.ImageFile.FileName);
+                        string extension = Path.GetExtension(book.ImageFile.FileName);
+                        book.ImageName = fileName = fileName + DateTime.Now.ToString("yymmssfff") + extension;
+                        string path = Path.Combine(wwwRootPath + "/Image/", fileName);
+                        using (var fileStream = new FileStream(path, FileMode.Create))
+                        {
+                            await book.ImageFile.CopyToAsync(fileStream);
+                        }
+                    }
+                   
+
                     _context.Update(book);
                     await _context.SaveChangesAsync();
                 }
@@ -146,6 +257,7 @@ namespace BookStorageApp.Controllers
         }
 
         // GET: Books/Delete/5
+        [Authorize(Roles = "admin")]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -165,10 +277,20 @@ namespace BookStorageApp.Controllers
 
         // POST: Books/Delete/5
         [HttpPost, ActionName("Delete")]
+        [Authorize(Roles = "admin")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var book = await _context.Books.FindAsync(id);
+
+            if (book.ImageName != "NoImage.png")
+            {
+                var imagePath = Path.Combine(_hostEnvironment.WebRootPath, "image", book.ImageName);
+                if (System.IO.File.Exists(imagePath))
+                    System.IO.File.Delete(imagePath);
+            }
+          
+
             _context.Books.Remove(book);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
@@ -177,6 +299,30 @@ namespace BookStorageApp.Controllers
         private bool BookExists(int id)
         {
             return _context.Books.Any(e => e.Id == id);
+        }
+
+        public async Task<IActionResult> Filter(string sortOrder)
+        {
+            var books = from s in _context.Books
+                        select s;
+
+
+            switch (sortOrder)
+            {
+                case "Название":
+                    books = books.OrderBy(s => s.Title);
+                    break;
+                case "Количество глав":
+                    books = books.OrderBy(s => s.ChapterNumber);
+                    break;
+                case "Дата выхода":
+                    books = books.OrderBy(s => s.ReleaseYear);
+                    break;
+                default:
+                    books = books.OrderBy(s => s.Title);
+                    break;
+            }
+            return RedirectToAction(nameof(Index), nameof(Book), await books.ToListAsync());
         }
     }
 }

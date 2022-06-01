@@ -25,5 +25,10 @@ namespace BookStorageApp.Models
         [Required]
         [Display(Name = "Название главы")]
         public string Name { get; set; }
+        public ICollection<Comment> CommentOfChapter { get; set; }
+        public Chapter()
+        {
+            CommentOfChapter = new HashSet<Comment>();
+        }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using BookStorageApp.Models;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -13,6 +14,7 @@ namespace BookStorageApp.Controllers
     public class HomeController : Controller
     {
         private AppDbContext db;
+        private readonly UserManager<User> _userManager;
         public HomeController(AppDbContext context)
         {
             db = context;
@@ -22,6 +24,13 @@ namespace BookStorageApp.Controllers
         {
             return View();
         }
+
+ /*       public async Task<IActionResult> HeaderPartial()
+        {
+            await _userManager.FindByNameAsync
+                
+            return PartialView("HeaderPartial", );
+        }  */     
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()

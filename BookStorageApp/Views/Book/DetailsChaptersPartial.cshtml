@@ -1,0 +1,46 @@
+﻿@model BookStorageApp.Models.Book
+
+<div>
+    <h1>@Html.DisplayNameFor(model => model.ChaptersOfBook)</h1>
+
+    <div>
+        @if (User.IsInRole("admin"))
+        {
+            <a asp-controller="Chapter" asp-action="Create" asp-route-id="@Model.Id"><button class="btn btn-primary">Добавить новую главу</button></a>
+        }     
+
+        <table class="table">
+            <tr>
+                <td>@Html.DisplayNameFor(model => model.ChaptersOfBook.First().VolumeNumber)</td>
+                <td>@Html.DisplayNameFor(model => model.ChaptersOfBook.First().ChapterNumber)</td>
+                <td>@Html.DisplayNameFor(model => model.ChaptersOfBook.First().Name)</td>
+                @if (User.IsInRole("admin"))
+                {
+                    <td>Редактирование</td>
+                }
+            </tr>
+
+            @foreach (var chapter in @Model.ChaptersOfBook.OrderBy(model => model.VolumeNumber).ThenBy(model => model.ChapterNumber))
+            {
+                <tr>
+                    <td><a asp-controller="Chapter" asp-action="Details" asp-route-id="@chapter.Id"><button class="btn btn-primary">@chapter.VolumeNumber</button></a></td>
+                    <td><a asp-controller="Chapter" asp-action="Details" asp-route-id="@chapter.Id"><button class="btn btn-primary">@chapter.ChapterNumber</button></a></td>
+                    <td><a asp-controller="Chapter" asp-action="Details" asp-route-id="@chapter.Id"><button class="btn btn-primary">@chapter.Name</button></a></td>
+                    @if (User.IsInRole("admin"))
+                    {
+                        <td>
+                            <a asp-controller="Chapter" asp-action="Edit" asp-route-id="@chapter.Id"><button class="btn btn-warning">Изменить</button></a>
+                            <a asp-controller="Chapter" asp-action="Delete" asp-route-id="@chapter.Id"><button class="btn btn-danger">Удалить</button></a>
+                        </td>
+                    }
+                </tr>
+            }
+        </table>
+
+    </div>
+
+</div>
+
+<div>
+    <a asp-controller="Book" asp-action="Index"><button class="btn btn-primary">Назад в каталог</button></a>
+</div>

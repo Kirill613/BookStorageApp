@@ -1,0 +1,21 @@
+﻿@model BookStorageApp.Models.Comment
+
+<h4>Comment</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-controller="Comments" asp-action="CreateForChapter">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <textarea style="width:20em; height:10em" asp-for="Text" class="form-control"></textarea>
+            </div>
+
+            <input type="hidden" asp-for="BookId" value="@ViewData["BookId"]" class="form-control" />
+            <input type="hidden" asp-for="ChapterId" value="@ViewData["ChapterId"]" class="form-control" />
+
+            <div class="form-group">
+                <input type="submit" value="Create" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>

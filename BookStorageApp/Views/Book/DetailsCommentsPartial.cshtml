@@ -1,0 +1,25 @@
+﻿@model BookStorageApp.Models.Book
+
+@{
+    ViewData["BookId"] = Model.Id;
+}
+
+@await Html.PartialAsync("DetailsCommentsAddPartial", Model.CommentsOfBook.FirstOrDefault(), ViewData)
+
+
+
+<div class="row">
+    <div class="col-4">Текст комментария</div>
+    <div class="col">Пользователь</div>
+</div>
+
+@foreach (var item in Model.CommentsOfBook)
+{
+    <div class="row">
+        <div class="col-4">@Html.Raw(item.Text.Replace("\r\n", "<br />"))</div>
+
+        <div class="col">
+            <a class="btn btn-outline-primary me-2 " asp-controller="Account" asp-action="Profile" asp-route-username=@item.User.UserName>@item.User.Email</a>
+        </div>
+    </div>
+}

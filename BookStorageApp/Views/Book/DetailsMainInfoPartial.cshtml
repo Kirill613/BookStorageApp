@@ -1,0 +1,69 @@
+﻿@model BookStorageApp.Models.Book
+
+<h1>Book Details</h1>
+
+<dl class="row">
+    <dt class="col-sm-2">
+        @Html.DisplayNameFor(model => model.Title)
+    </dt>
+    <dd class="col-sm-10">
+        @Html.DisplayFor(model => model.Title)
+    </dd>
+    <dt class="col-sm-2">
+        @Html.DisplayNameFor(model => model.Info)
+    </dt>
+    <dd class="col-sm-10">
+        @Html.DisplayFor(model => model.Info)
+    </dd>
+    <dt class="col-sm-2">
+        @Html.DisplayNameFor(model => model.ReleaseYear)
+    </dt>
+    <dd class="col-sm-10">
+        @Html.DisplayFor(model => model.ReleaseYear)
+    </dd>
+    <dt class="col-sm-2">
+        @Html.DisplayNameFor(model => model.AuthorName)
+    </dt>
+    <dd class="col-sm-10">
+        @Html.DisplayFor(model => model.AuthorName)
+    </dd>
+    <dt class="col-sm-2">
+        @Html.DisplayNameFor(model => model.ChapterNumber)
+    </dt>
+    <dd class="col-sm-10">
+        @Html.DisplayFor(model => model.ChapterNumber)
+    </dd>
+
+
+    <dt class="col-sm-2">
+        Uploaded Image
+    </dt>
+    <dd class="col-sm-10">
+        <img src="@("~/Image/"+ @Model.ImageName)" asp-append-version="true" width="200" height="200" />
+    </dd>
+
+
+    <dt class="col-sm-2">
+        @Html.DisplayNameFor(model => model.TagsOfBook)
+    </dt>
+    <dd class="col-sm-10">
+        @foreach (var tag in @Model.TagsOfBook)
+        {
+            <span>@tag.Name </span>
+        }
+    </dd>
+</dl>
+
+
+<div>
+    @if (User.IsInRole("admin"))
+    {
+        <a asp-controller="Book" asp-action="Edit" asp-route-id="@Model.Id"><button class="btn btn-warning">Изменить</button></a> <span>|</span>
+        <a asp-controller="Book" asp-action="Delete" asp-route-id="@Model.Id"><button class="btn btn-danger">Удалить</button></a>
+    }
+    @if (User.Identity.IsAuthenticated)
+    {
+        <span>|</span> <a asp-action="AddBookToUser" asp-controller="UserBooks" asp-route-bookId="@Model.Id" asp-route-returnUrl="@ViewBag.CurrentUrl"><button class="btn btn-primary">Добавить</button></a>
+    }
+</div>
+
